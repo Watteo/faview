@@ -10,7 +10,7 @@ On the server side, the website runs on [Django](https://www.djangoproject.com/)
 plus [FAPWS](http://www.fapws.org/). Caching is handled by a memcached daemon.
 
 Since nothing is perfect, I must point out an important flaw: you cannot (and
-should not steal other website's bandwith (indiscriminately) so the server
+should not) steal other website's bandwith (indiscriminately) so the server
 caches all resources (images, audio, etc) on the local directory before serving
 them to clients. This was done so that you can run the service on your main
 machine and use it from a mobile device on your LAN with little added delay.
