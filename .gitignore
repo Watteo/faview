@@ -1,0 +1,6 @@
+*.pyc
+db.sqlite3
+website.log
+/media
+/static
+/fa/static/materialize

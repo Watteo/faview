@@ -1,0 +1,192 @@
+from django.core.cache import cache
+from django.conf import settings
+from datetime import datetime
+import json
+import logging
+import os
+import re
+import time
+import urllib2
+
+logger      = logging.getLogger(__name__)
+API_URL     = settings.FAEXPORT_API_URL
+API_TIMEOUT = settings.FAEXPORT_API_TIMEOUT
+USER_AGENT  = 'Mozilla/5.0 (Windows NT 6.1; rv:31.0) Gecko/20100101 Firefox/31.0'
+USER_REGEX  = re.compile(r'^http://www.furaffinity.net/user/([-_.~\[\]\w]+)/')
+MEDIA_REGEX = re.compile(r'(^http:| src=")/(/[adt]\.facdn\.net|themes)/(.*?\.[a-zA-Z0-9]+)(#[\w]+)?($|")')
+
+MEDIA_PREFIX = {
+    '/a.facdn.net'  : 'avatar/',
+    '/d.facdn.net'  : 'data/',
+    '/t.facdn.net'  : 'thumbnail/',
+    'themes'        : 'themes/',
+}
+MEDIA_URL_PREFIX = {
+    '/a.facdn.net'  : 'http://a.facdn.net/',
+    '/d.facdn.net'  : 'http://d.facdn.net/',
+    '/t.facdn.net'  : 'http://t.facdn.net/',
+    'themes'        : 'http://www.furaffinity.net/themes/',
+}
+
+class RegexFetcher(object):
+    def __init__(self):
+        pass
+
+    def __call__(self, match):
+        logger.debug(match.groups())
+        url_root    = match.group(2)
+        url_path    = match.group(3)
+        media_prefix= MEDIA_PREFIX[url_root]
+
+        local_path  = os.path.join(
+            settings.MEDIA_ROOT,
+            media_prefix,
+            url_path,
+        )
+        local_dir   = os.path.dirname(local_path)
+
+        if not os.path.isfile(local_path):
+            if not os.path.isdir(local_dir):
+                os.makedirs(local_dir)
+
+            url         = MEDIA_URL_PREFIX[url_root] + url_path
+            logger.debug(url)
+            request_obj = urllib2.Request(url)
+            request_obj.add_header('User-Agent', USER_AGENT)
+
+            try:
+                opener      = urllib2.build_opener()
+                raw_data    = opener.open(request_obj).read()
+            except urllib2.HTTPError as error:
+                raw_data    = error.read()
+            except Exception:
+                return ''.join([g for g in match.groups() if g])
+
+            with open(local_path, 'wb') as f:
+                f.write(raw_data)
+                f.close()
+                #time.sleep(1)
+                #logger.debug('hi')
+
+        local_url = settings.MEDIA_URL + media_prefix + url_path
+        logger.debug(local_path)
+        logger.debug(local_url)
+
+        if match.group(1) == 'http:':
+            return local_url
+        else:
+            return match.group(1) + local_url + match.group(5)
+
+def api_fetch(api_key, extra_args=''):
+    cache_key = api_key + extra_args
+    data = cache.get(cache_key)
+
+    if data is None:
+        logger.debug('CACHE MISS: {}'.format(cache_key))
+        request_url = '{}/{}.json{}'.format(API_URL, api_key, extra_args)
+        request_obj = urllib2.Request(request_url)
+        request_obj.add_header('User-Agent', USER_AGENT)
+
+        opener      = urllib2.build_opener()
+        raw_data    = opener.open(request_obj).read()
+        data        = json.loads(raw_data)
+
+        cache.set(cache_key, data, API_TIMEOUT)
+    else:
+        logger.debug('CACHE HIT: {}'.format(cache_key))
+
+    return data
+
+def api_fetch_watchs(name, watch_view, limit=None):
+    watchs = []
+    index = 1
+
+    while True:
+        try:
+            batch = api_fetch(
+                'user/{}/{}'.format(name, watch_view),
+                '?page={}'.format(index) if index > 1 else '',
+            )
+        except:
+            break
+
+        if not batch:
+            break
+
+        watchs += batch
+        index += 1
+
+        if limit and limit <= len(watchs):
+            watchs = watchs[0:limit]
+            break
+
+    return [(user, user.lower().replace('_', '')) for user in watchs]
+
+def txt_fetch(url):
+    cache_key = 'txt:' + url
+    data = cache.get(cache_key)
+
+    if data is None:
+        logger.debug('CACHE MISS: {}'.format(cache_key))
+        request_obj = urllib2.Request(url)
+        request_obj.add_header('User-Agent', USER_AGENT)
+
+        opener      = urllib2.build_opener()
+        raw_data    = opener.open(request_obj).read()
+        data        = raw_data.replace('\n', '<br>')
+        cache.set(cache_key, data, API_TIMEOUT)
+    else:
+        logger.debug('CACHE HIT: {}'.format(cache_key))
+
+    return data
+
+def get_username(profile_url):
+    return USER_REGEX.sub(r'\1', profile_url)
+
+def auto_fetch_media(content):
+    return MEDIA_REGEX.sub(RegexFetcher(), content)
+
+def natural_delta(then_str, now_date):
+    then_date = datetime.strptime(then_str, '%Y-%m-%dT%H:%M:%SZ')
+    delta = now_date - then_date
+    delta_seconds   = delta.seconds
+    delta_minutes   = delta_seconds/(60)
+    delta_hours     = delta_seconds/(60*60)
+    delta_days      = delta.days
+    delta_weeks     = delta_days/7
+    delta_months    = delta_days/30
+    delta_years     = delta_days/365
+    str_delta = '{} {} ago'
+
+    if delta_years:
+        if delta_years == 1:
+            return 'a year ago'
+        else:
+            return str_delta.format(delta_years, 'years')
+    elif delta_months:
+        if delta_months == 1:
+            return 'a month ago'
+        else:
+            return str_delta.format(delta_months, 'months')
+    elif delta_weeks:
+        if delta_weeks == 1:
+            return 'a week ago'
+        else:
+            return str_delta.format(delta_weeks, 'weeks')
+    elif delta_days:
+        if delta_days == 1:
+            return 'a day ago'
+        else:
+            return str_delta.format(delta_days, 'days')
+    elif delta_hours:
+        if delta_hours == 1:
+            return 'an hour ago'
+        else:
+            return str_delta.format(delta_hours, 'hours')
+    elif delta_minutes:
+        if delta_minutes == 1:
+            return 'a minute ago'
+        else:
+            return str_delta.format(delta_minutes, 'minutes')
+
+    return 'a few seconds ago'
