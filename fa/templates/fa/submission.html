@@ -86,8 +86,8 @@
     <div class="row">
       <div class="col s12 art-content">
         <div class="center-align"><a href="{{ sub_data.download }}"><img class="img-responsive z-depth-1" src="{{ sub_data.full }}"></a></div>
-        {% if sub_data.text_content %}<div class="container-main"><p class="flow-text grey-text text-darken-4 lighten-3">{{ sub_data.text_content|safe }}</p></div>{% endif %}
-        {% if sub_data.audio_content %}<div class="center-align" style="margin-top: 10px;"><audio controls><source src="{{ sub_data.audio_content }}" type="audio/{{ sub_data.audio_type }}"></audio></div>{% endif %}
+        {% if sub_data.text_content %}<div class="container-main" style="margin:auto;"><p class="col s12 flow-text grey-text text-darken-4 lighten-3">{{ sub_data.text_content|safe }}</p></div>{% endif %}
+        {% if sub_data.audio_content %}<div class="center-align" style="margin-top:10px;"><audio controls><source src="{{ sub_data.audio_content }}" type="audio/{{ sub_data.audio_type }}"></audio></div>{% endif %}
       </div>
     </div>
     <div class="row">

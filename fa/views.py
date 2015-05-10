@@ -44,10 +44,20 @@ def user(request, name):
     if api_gallery:
         try:
             api_sub_data = api_fetch('submission/{}'.format(api_gallery[0]))
-            head_img = {
-                'id'    : api_gallery[0],
-                'full'  : auto_fetch_media(api_sub_data['full']),
-            }
+
+            file_ext = re.sub(
+                r'.*\.([a-zA-Z0-9]+)$',
+                r'\1',
+                api_sub_data['full']
+            ).lower()
+
+            if file_ext not in ('jpeg', 'jpg', 'png', 'gif', 'tif', 'tiff'):
+                head_img = None
+            else:
+                head_img = {
+                    'id'    : api_gallery[0],
+                    'full'  : auto_fetch_media(api_sub_data['full']),
+                }
         except Exception as e:
             logger.exception(e)
             head_img = None
@@ -224,7 +234,6 @@ def submission(request, sub_id):
 
     if file_ext not in ('jpeg', 'jpg', 'png', 'gif', 'tif', 'tiff'):
         api_sub_data['full'] = auto_fetch_media(api_sub_data['thumbnail'])
-        logger.debug(api_sub_data['thumbnail'])
 
     for comment in api_sub_comments:
         comment['avatar']   = auto_fetch_media(comment['avatar'])

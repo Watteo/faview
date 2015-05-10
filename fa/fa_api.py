@@ -1,6 +1,7 @@
 from django.core.cache import cache
 from django.conf import settings
 from datetime import datetime
+import chardet
 import json
 import logging
 import os
@@ -128,13 +129,27 @@ def txt_fetch(url):
 
     if data is None:
         logger.debug('CACHE MISS: {}'.format(cache_key))
-        request_obj = urllib2.Request(url)
-        request_obj.add_header('User-Agent', USER_AGENT)
+        local_path = re.sub(
+            r'{}(.*)'.format(settings.MEDIA_URL),
+            r'{}\1'.format(settings.MEDIA_ROOT),
+            url,
+        )
 
-        opener      = urllib2.build_opener()
-        raw_data    = opener.open(request_obj).read()
-        data        = raw_data.replace('\n', '<br>')
-        cache.set(cache_key, data, API_TIMEOUT)
+        with open(local_path, 'rb') as f:
+            raw_data = f.read()
+            encoding = chardet.detect(raw_data)
+
+            try:
+                data = raw_data.decode(encoding['encoding'])
+                data = data.replace('<', '&lt;')
+                data = data.replace('>', '&gt;')
+                data = data.replace('\r\n', '<br>\n')
+                data = data.replace('\n', '<br>\n')
+            except Exception as e:
+                logger.exception(e)
+                data = ''
+
+            cache.set(cache_key, data, API_TIMEOUT)
     else:
         logger.debug('CACHE HIT: {}'.format(cache_key))
 
