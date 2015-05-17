@@ -35,7 +35,7 @@ class RegexFetcher(object):
 
     def __call__(self, match):
         url_root    = match.group(2)
-        url_path    = urllib2.quote(match.group(3).encode('utf-8'))
+        url_path    = urllib2.quote(match.group(3).encode('utf-8'), '/:@')
         media_prefix= MEDIA_PREFIX[url_root]
 
         local_path  = os.path.join(
