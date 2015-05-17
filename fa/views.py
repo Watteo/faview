@@ -285,3 +285,48 @@ def journal(request, journ_id):
 
     return render(request, 'fa/journal.html', context)
 
+def search(request):
+    query = request.GET.get('q')
+
+    if not query:
+        return render(request, 'fa/search.html', {
+            'query'     : '',
+            'gallery'   : [],
+            'previous'  : False,
+            'next'      : False,
+        })
+
+    try:
+        if request.GET.get('page'):
+            page = max(int(request.GET['page']), 1)
+            extra_args = '?q={}&full=1&page={}'.format(query, page)
+        else:
+            page = 1
+            extra_args = '?q={}&full=1'.format(query)
+
+        api_search_res  = api_fetch('search', extra_args)
+        result_size     = len(api_search_res)
+        previous_page   = (page - 1) if page != 1 and result_size > 0 else False
+        next_page       = (page + 1) if result_size > 0 else False
+    except Exception as e:
+        logger.exception(e)
+        return render(request, 'fa/500.html', {'exception':e})
+
+    gallery = []
+
+    for img in api_search_res:
+        if img['title'] == 'Submission has been deleted':
+            continue
+
+        img['thumbnail'] = auto_fetch_media(img['thumbnail'])
+        gallery.append(img)
+
+    context = {
+        'query'     : query,
+        'gallery'   : gallery,
+        'previous'  : previous_page,
+        'next'      : next_page,
+    }
+
+    return render(request, 'fa/search.html', context)
+

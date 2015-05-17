@@ -1,0 +1,106 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <title>Search - FAView</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/css/materialize.min.css">
+    <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
+    <style>
+    .brand-logo.truncate {
+      max-width: 60%;
+    }
+    .container-main {
+      padding: 0px 0px;
+      width: 100%;
+    }
+    @media screen and (min-width : 601px) {
+      .container-main {
+        width: 90%;
+      }
+    }
+    @media screen and (min-width: 993px) {
+      .container-main {
+        width: 90%;
+        max-width: 950px;
+      }
+    }
+    .card {
+      height: 263px;
+    }
+    .card .card-image {
+      background: black;
+      max-height: 200px;
+      overflow: hidden;
+    }
+    .card .card-image img {
+      -o-transition: .1s;
+      -ms-transition: .1s;
+      -moz-transition: .1s;
+      -webkit-transition: .1s;
+      transition: .1s;
+      -webkit-filter: blur(1px);
+      filter: blur(1px);
+      opacity: 0.85;
+    }
+    .card .card-image:hover img {
+      opacity: 0.5;
+      -webkit-filter: blur(3px);
+      filter: blur(3px);
+    }
+    .card .card-image .card-title {
+      bottom: auto;
+      text-shadow: 0px 0px 3px rgba(0,0,0,0.9);
+    }
+    .card .card-action {
+      position: absolute;
+      bottom: 0px;
+      width: 100%;
+    }
+    </style>
+  </head>
+  <body>
+    <nav class="top-nav blue-grey darken-4">
+      <div class="container">
+        <div class="nav-wrapper">
+          <a href="{% url 'fa.views.search' %}" class="brand-logo truncate">Search - FAView</a>
+        </div>
+      </div>
+    </nav>
+    <div class="container container-main row">
+      <form class="col s12" style="padding:15px 0px;" method="get" action="{% url 'fa.views.search' %}">
+        <div class="input-field col s12">
+          <input placeholder="@keywords kw1 kw2..." id="query" name="q" value="{{ query }}" type="text" class="validate">
+          <label for="query">Search query</label>
+        </div>
+      </form>
+
+      {% for image in gallery %}<div class="col s6 m4 l3">
+        <div class="card">
+          <div class="card-image">
+            <a href="{% url 'fa.views.submission' image.id %}">
+              <img src="{{ image.thumbnail }}">
+              <span class="card-title">{{ image.title }}</span>
+            </a>
+          </div>
+          <div class="card-action">
+            <a href="{{ image.link }}" target="_blank">View on FA</a>
+          </div>
+        </div>
+      </div>{% endfor %}
+      {% if query and not gallery %}<p class="col s12 center-align black-text">No items available.</p>{% endif %}
+
+      <div class="col s12" style="padding-top:20px;padding-bottom:20px;">
+        {% if previous %}<a class="waves-effect waves-light blue-grey darken-3 btn left" href="{% url 'fa.views.search' %}?q={{ query }}&page={{ previous }}"><i class="mdi-navigation-chevron-left left"></i>Newer</a>{% endif %}
+        {% if next %}<a class="waves-effect waves-light blue-grey darken-3 btn right" href="{% url 'fa.views.search' %}?q={{ query }}&page={{ next }}"><i class="mdi-navigation-chevron-right right"></i>Older</a>{% endif %}
+      </div>
+
+      <p class="col s12 center-align grey-text text-lighten-1">This site is powered by
+      <a href="http://faexport.boothale.net/" target="_blank" class="grey-text">FAExport</a>,
+      <a href="http://materializecss.com/" target="_blank" class="grey-text">Materialize</a>
+      and <a href="https://jquery.com/" target="_blank" class="grey-text">jQuery</a>.</p>
+    </div>
+  </body>
+</html>

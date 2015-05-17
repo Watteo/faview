@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^user/(?P<name>[-_.~\[\]\w]+)/journals/$', views.journals),
     url(r'^submission/(?P<sub_id>[0-9]+)/$', views.submission),
     url(r'^journal/(?P<journ_id>[0-9]+)/$', views.journal),
+    url(r'^search/$', views.search),
 ]
