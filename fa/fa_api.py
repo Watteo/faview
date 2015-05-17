@@ -35,7 +35,7 @@ class RegexFetcher(object):
 
     def __call__(self, match):
         url_root    = match.group(2)
-        url_path    = match.group(3)
+        url_path    = urllib2.quote(match.group(3).encode('utf-8'))
         media_prefix= MEDIA_PREFIX[url_root]
 
         local_path  = os.path.join(
@@ -58,8 +58,9 @@ class RegexFetcher(object):
                 raw_data    = opener.open(request_obj).read()
             except urllib2.HTTPError as error:
                 raw_data    = error.read()
-            except Exception:
-                return ''.join([g for g in match.groups() if g])
+            except Exception as e:
+                logger.exception(e)
+                return url
 
             with open(local_path, 'wb') as f:
                 f.write(raw_data)
