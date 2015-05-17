@@ -34,7 +34,6 @@ class RegexFetcher(object):
         pass
 
     def __call__(self, match):
-        logger.debug(match.groups())
         url_root    = match.group(2)
         url_path    = match.group(3)
         media_prefix= MEDIA_PREFIX[url_root]
@@ -51,7 +50,6 @@ class RegexFetcher(object):
                 os.makedirs(local_dir)
 
             url         = MEDIA_URL_PREFIX[url_root] + url_path
-            logger.debug(url)
             request_obj = urllib2.Request(url)
             request_obj.add_header('User-Agent', USER_AGENT)
 
@@ -66,12 +64,8 @@ class RegexFetcher(object):
             with open(local_path, 'wb') as f:
                 f.write(raw_data)
                 f.close()
-                #time.sleep(1)
-                #logger.debug('hi')
 
         local_url = settings.MEDIA_URL + media_prefix + url_path
-        logger.debug(local_path)
-        logger.debug(local_url)
 
         if match.group(1) == 'http:':
             return local_url
