@@ -43,6 +43,7 @@ def api_fetch(api_key, extra_args=''):
     if data is None:
         logger.debug('CACHE MISS: {}'.format(cache_key))
         request_url = '{}/{}.json{}'.format(API_URL, api_key, extra_args)
+        request_url = urllib2.quote(request_url, ':/?&=')
         request_obj = urllib2.Request(request_url)
         request_obj.add_header('User-Agent', USER_AGENT)
 
