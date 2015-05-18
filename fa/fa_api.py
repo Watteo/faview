@@ -4,7 +4,6 @@ from datetime import datetime
 import chardet
 import json
 import logging
-import os
 import re
 import time
 import urllib2
@@ -14,19 +13,13 @@ API_URL     = settings.FAEXPORT_API_URL
 API_TIMEOUT = settings.FAEXPORT_API_TIMEOUT
 USER_AGENT  = 'Mozilla/5.0 (Windows NT 6.1; rv:31.0) Gecko/20100101 Firefox/31.0'
 USER_REGEX  = re.compile(r'^http://www.furaffinity.net/user/([-_.~\[\]\w]+)/')
-MEDIA_REGEX = re.compile(r'(^http:| src=")/(/[adt]\.facdn\.net|themes)/(.*?\.[a-zA-Z0-9]+)(#[\w]+)?($|")')
+MEDIA_REGEX = re.compile(r'(^http:| src=")/(/[adt]\.facdn\.net|themes)(/.*?\.[a-zA-Z0-9]+)(#[^"]+)?($|")')
 
 MEDIA_PREFIX = {
-    '/a.facdn.net'  : 'avatar/',
-    '/d.facdn.net'  : 'data/',
-    '/t.facdn.net'  : 'thumbnail/',
-    'themes'        : 'themes/',
-}
-MEDIA_URL_PREFIX = {
-    '/a.facdn.net'  : 'http://a.facdn.net/',
-    '/d.facdn.net'  : 'http://d.facdn.net/',
-    '/t.facdn.net'  : 'http://t.facdn.net/',
-    'themes'        : 'http://www.furaffinity.net/themes/',
+    '/a.facdn.net' : settings.MEDIA_URL + 'avatar',
+    '/d.facdn.net' : settings.MEDIA_URL + 'data',
+    '/t.facdn.net' : settings.MEDIA_URL + 'thumbnail',
+    'themes'       : settings.MEDIA_URL + 'themes',
 }
 
 class RegexFetcher(object):
@@ -36,37 +29,7 @@ class RegexFetcher(object):
     def __call__(self, match):
         url_root    = match.group(2)
         url_path    = urllib2.quote(match.group(3).encode('utf-8'), '/:@')
-        media_prefix= MEDIA_PREFIX[url_root]
-
-        local_path  = os.path.join(
-            settings.MEDIA_ROOT,
-            media_prefix,
-            url_path,
-        )
-        local_dir   = os.path.dirname(local_path)
-
-        if not os.path.isfile(local_path):
-            if not os.path.isdir(local_dir):
-                os.makedirs(local_dir)
-
-            url         = MEDIA_URL_PREFIX[url_root] + url_path
-            request_obj = urllib2.Request(url)
-            request_obj.add_header('User-Agent', USER_AGENT)
-
-            try:
-                opener      = urllib2.build_opener()
-                raw_data    = opener.open(request_obj).read()
-            except urllib2.HTTPError as error:
-                raw_data    = error.read()
-            except Exception as e:
-                logger.exception(e)
-                return url
-
-            with open(local_path, 'wb') as f:
-                f.write(raw_data)
-                f.close()
-
-        local_url = settings.MEDIA_URL + media_prefix + url_path
+        local_url   = MEDIA_PREFIX[url_root] + url_path
 
         if match.group(1) == 'http:':
             return local_url
