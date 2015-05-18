@@ -208,7 +208,7 @@ def submission(request, sub_id):
         return render(request, 'fa/500.html', {'exception':e})
 
     if api_user_data['full_name'] == 'Not Available...':
-      api_user_data['full_name'] = name
+      api_user_data['full_name'] = username
 
     right_now                   = datetime.now()
     api_sub_data['full']        = auto_fetch_media(api_sub_data['full'])
