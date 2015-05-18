@@ -4,11 +4,20 @@
 {% block default_nav_title %}FAView{% endblock %}
 
 {% block style %}
-.container {max-width: 800px;}
+.container-main {
+  max-width: 950px;
+  padding: 0px 0px;
+  width: 100%;
+}
+@media screen and (min-width : 601px) {
+  .container-main {
+    width: 90%;
+  }
+}
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container container-main">
   <h3>Something went wrong.</h3>
   <h4>Here's what happened:</h4>
   <p>{{ exception }}</p>

@@ -10,6 +10,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
     <script>$(document).ready(function(){$('.button-collapse').sideNav();});</script>
     <style>
+      .brand-logo.truncate {
+        max-width: 60%;
+      }
       {% block style %}{% endblock %}
     </style>
   </head>
@@ -19,7 +22,6 @@
       <li><a href="{% url 'fa.views.journals' username %}">Journals</a></li>
       <li><a href="{% url 'fa.views.watch' username 'watchers' %}">Watchers</a></li>
       <li><a href="{% url 'fa.views.watch' username 'watching' %}">Watching</a></li>
-      <li class="divider"></li>
       <li><a href="{% url 'fa.views.search' %}">Search</a></li>
       <li><a href="{% url 'fa.views.index' %}">Index</a></li>
     </ul>
@@ -40,19 +42,14 @@
             <li><a href="{% url 'fa.views.journals' username %}">Journals</a></li>
             <li><a href="{% url 'fa.views.watch' username 'watchers' %}">Watchers</a></li>
             <li><a href="{% url 'fa.views.watch' username 'watching' %}">Watching</a></li>
-            <li class="divider"></li>
-            <li><a href="{% url 'fa.views.search' %}">Search</a></li>
             <li><a href="{% url 'fa.views.index' %}">Index</a></li>
+            <li><a href="{% url 'fa.views.search' %}">Search</a></li>
           </ul>
           <a href="#" data-activates="slide-out" class="button-collapse"><i class="mdi-navigation-menu"></i></a>
         </div>
       </div>
     </nav>
     {% else %}
-    <ul id="dropdown-nav" class="dropdown-content">
-      <li><a href="{% url 'fa.views.search' %}">Search</a></li>
-      <li><a href="{% url 'fa.views.index' %}">Index</a></li>
-    </ul>
     <nav class="top-nav blue-grey darken-4">
       <div class="container">
         <div class="nav-wrapper">
@@ -62,6 +59,11 @@
             <li><a href="{% url 'fa.views.search' %}">Search</a></li>
             <li><a href="{% url 'fa.views.index' %}">Index</a></li>
           </ul>
+          <ul id="slide-out" class="side-nav">
+            <li><a href="{% url 'fa.views.index' %}">Index</a></li>
+            <li><a href="{% url 'fa.views.search' %}">Search</a></li>
+          </ul>
+          <a href="#" data-activates="slide-out" class="button-collapse"><i class="mdi-navigation-menu"></i></a>
         {% endblock %}
         </div>
       </div>

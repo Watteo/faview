@@ -6,14 +6,27 @@
 <ul id="nav-mobile" class="right hide-on-med-and-down">
   <li><a href="{% url 'fa.views.search' %}">Search</a></li>
 </ul>
+<ul id="slide-out" class="side-nav">
+  <li><a href="{% url 'fa.views.index' %}">Index</a></li>
+  <li><a href="{% url 'fa.views.search' %}">Search</a></li>
+</ul>
+<a href="#" data-activates="slide-out" class="button-collapse"><i class="mdi-navigation-menu"></i></a>
 {% endblock %}
 
 {% block style %}
-.container {max-width: 800px;}
+.container-main {
+  max-width: 950px;
+  width: 100%;
+}
+@media screen and (min-width : 601px) {
+  .container-main {
+    width: 90%;
+  }
+}
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container container-main">
   <h3>Use it just like <a href="http://faexport.boothale.net" target="_blank">FAExport</a>!</h3>
 
   <h4>/user/<em>{name}</em></h4>
