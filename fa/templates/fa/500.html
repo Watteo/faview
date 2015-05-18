@@ -1,32 +1,16 @@
-{% load staticfiles %}
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
-    <title>Internal Server Error - FAView</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/css/materialize.min.css">
-    <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
-    <style>.container {max-width: 800px;}</style>
-  </head>
-  <body>
-    <nav>
-      <div class="nav-wrapper blue-grey darken-4">
-        <div class="container">
-          <a href="{% url 'fa.views.index' %}" class="brand-logo">FAView</a>
-        </div>
-      </div>
-    </nav>
-    <div class="container">
-      <h3>Something went wrong.</h3>
-      <h4>Here's what happened:</h4>
-      <p>{{ exception }}</p>
+{% extends "fa/base.html" %}
 
-      <p class="col s12 center-align grey-text text-lighten-1">This site is powered by
-      <a href="http://faexport.boothale.net/" target="_blank" class="grey-text">FAExport</a>,
-      <a href="http://materializecss.com/" target="_blank" class="grey-text">Materialize</a>
-      and <a href="https://jquery.com/" target="_blank" class="grey-text">jQuery</a>.</p>
-    </div>
-  </body>
-</html>
+{% block title %}Internal Server Error{% endblock %}
+{% block default_nav_title %}FAView{% endblock %}
+
+{% block style %}
+.container {max-width: 800px;}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h3>Something went wrong.</h3>
+  <h4>Here's what happened:</h4>
+  <p>{{ exception }}</p>
+</div>
+{% endblock %}

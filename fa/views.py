@@ -201,9 +201,14 @@ def submission(request, sub_id):
     try:
         api_sub_comments    = api_fetch('submission/{}/comments'.format(sub_id))
         api_sub_data        = api_fetch('submission/{}'.format(sub_id))
+        username            = get_username(api_sub_data['profile'])
+        api_user_data       = api_fetch('user/{}'.format(username))
     except Exception as e:
         logger.exception(e)
         return render(request, 'fa/500.html', {'exception':e})
+
+    if api_user_data['full_name'] == 'Not Available...':
+      api_user_data['full_name'] = name
 
     right_now                   = datetime.now()
     api_sub_data['full']        = auto_fetch_media(api_sub_data['full'])
@@ -242,8 +247,8 @@ def submission(request, sub_id):
         comment['text']     = auto_fetch_media(comment['text'])
 
     context = {
-        'name'      : api_sub_data['name'],
-        'username'  : get_username(api_sub_data['profile']),
+        'name'      : api_user_data['full_name'],
+        'username'  : username,
         'sub_data'  : api_sub_data,
         'comments'  : api_sub_comments,
     }

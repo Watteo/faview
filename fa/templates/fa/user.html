@@ -1,147 +1,137 @@
-{% load staticfiles %}
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
-    <title>{{ name }} - FAView</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/css/materialize.min.css">
-    <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
-    <script>$(document).ready(function(){$('.button-collapse').sideNav();});</script>
-    <style>
-    .brand-logo.truncate {
-      max-width: 60%;
-    }
-    @media screen and (max-width: 600px) {
-      .container-main {
-        padding: 0px 0px;
-        width: 100%;
-      }
-    }
-    .card .card-image {
-      background: black;
-    }
-    .card .card-image img {
-      opacity: 0.85;
-    }
-    .card .card-image .card-title {
-      text-shadow: 0px 0px 4px black;
-    }
-    .card .card-content .circle {
-      position: absolute;
-      height: 42px;
-      width: 42px;
-    }
-    .collection .collection-item.avatar {
-      height: auto;
-      min-height: 144px;
-      padding-left: 140px;
-    }
-    @media screen and (max-width : 600px) {
-      .collection .collection-item.avatar {
-        padding-left: 20px;
-      }
-    }
-    .collection .collection-item.avatar .circle {
-      width: 100px;
-      height: 100px;
-      top: 22px;
-    }
-    .collapsible .collapsible-body .row {
-      margin-bottom: 5px;
-      margin-bottom: 0px;
-    }
-    .collapsible .collapsible-body a {
-      padding-top: 3px;
-      padding-bottom: 3px;
-    }
-    </style>
-  </head>
-  <body>
-    <nav class="top-nav blue-grey darken-4">
-      <div class="container">
-        <div class="nav-wrapper">
-          <a href="{% url 'fa.views.user' username %}" class="brand-logo truncate">{{ name }} - FAView</a>
-          <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="{% url 'fa.views.gallery' username 'gallery' %}">Gallery</a></li>
-            <li><a href="{% url 'fa.views.gallery' username 'scraps' %}">Scraps</a></li>
-            <li><a href="{% url 'fa.views.gallery' username 'favorites' %}">Favorites</a></li>
-            <li><a href="{% url 'fa.views.journals' username %}">Journals</a></li>
-          </ul>
-          <ul id="slide-out" class="side-nav">
-            <li><a href="{% url 'fa.views.gallery' username 'gallery' %}">Gallery</a></li>
-            <li><a href="{% url 'fa.views.gallery' username 'scraps' %}">Scraps</a></li>
-            <li><a href="{% url 'fa.views.gallery' username 'favorites' %}">Favorites</a></li>
-            <li><a href="{% url 'fa.views.journals' username %}">Journals</a></li>
-          </ul>
-          <a href="#" data-activates="slide-out" class="button-collapse"><i class="mdi-navigation-menu"></i></a>
-        </div>
-      </div>
-    </nav>
-    <div class="container container-main">
-      <div class="card large">
-        {% if head_img %}<div class="card-image">
-          <a href="{% url 'fa.views.submission' head_img.id %}"><img src="{{ head_img.full }}"></a>
-          <span class="card-title">{{ name }}</span>
-        </div>{% endif %}
-        <div class="card-content">
-          <span class="card-title activator grey-text text-darken-4"><i class="mdi-navigation-more-vert right"></i>User Profile</span>
-        </div>
-        <div class="card-reveal">
-          <span class="card-title grey-text text-darken-4"><img src="{{ avatar }}" class="circle"><i class="mdi-navigation-close right"></i></span>
-          <p class="flow-text">{% for key, value in user_data %}
-            <strong>{{ key }}</strong>&nbsp;<em style="float:right;">{{ value }}</em><br>
-          {% endfor %}</p>
-          <p class="flow-text">{{ profile|safe }}<p>
-        </div>
-        <div class="card-action">
-          <a href="{{ user_url }}" target="_blank">View on FA</a>
-        </div>
-      </div>
+{% extends "fa/base.html" %}
 
-      {% if shouts %}<ul class="collection z-depth-1">{% for shout in shouts %}
-        <li class="collection-item avatar">
-          <img src="{{ shout.avatar }}" class="circle hide-on-small-only" title="{{ shout.name }}">
-          <span class="title flow-text"><a href="{% url 'fa.views.user' shout.username %}">{{ shout.name }}</a></span>
-          <p class="grey-text text-lighten-1" title="{{ shout.posted }}">{{ shout.delta }}</p>
-          <p class="flow-text grey-text text-darken-2">{{ shout.text|safe }}</p>
-        </li>
-      {% endfor %}</ul>{% endif %}
+{% block title %}{{ name }}{% endblock %}
+{% block nav_title %}{{ name }}{% endblock %}
 
-      <ul class="collapsible z-depth-1" data-collapsible="accordion">
-        <li>
-          <div class="collapsible-header"><i class="mdi-social-poll"></i>Statistics</div>
-          <div class="collapsible-body"><p class="flow-text">{% for key, value in user_stats %}
-            <strong>{{ key }}</strong>&nbsp;<em style="float:right;">{{ value }}</em><br>
-          {% endfor %}</p></div>
-        </li>
-        <li>
-          <div class="collapsible-header"><i class="mdi-social-person"></i>Watched by</div>
-          <div class="collapsible-body">
-            <div class="row">
-              {% for user, id in watchers %}<a class="col s6 m4 l3 center-align" href="{% url 'fa.views.user' id %}">{{ user }}</a>{% endfor %}
-              {% if not watchers %}<p class="col s12 center-align black-text">This user doesn't have watchers.</p>
-              {% else %}<a class="col s12 flow-text center-align collapsible-link" href="{% url 'fa.views.watch' username 'watchers' %}">View All</a>{% endif %}
-            </div>
-          </div>
-        </li>
-        <li>
-          <div class="collapsible-header"><i class="mdi-social-person-outline"></i>Is watching</div>
-          <div class="collapsible-body">
-            <div class="row">
-              {% for user, id in watching %}<a class="col s6 m4 l3 center-align" href="{% url 'fa.views.user' id %}">{{ user }}</a>{% endfor %}
-              {% if not watching %}<p class="col s12 center-align black-text">This user is not watching anybody.</p>
-              {% else %}<a class="col s12 flow-text center-align collapsible-link" href="{% url 'fa.views.watch' username 'watching' %}">View All</a>{% endif %}
-            </div>
-          </div>
-        </li>
-      </ul>
+{% block style %}
+.brand-logo.truncate {
+  max-width: 60%;
+}
+@media screen and (max-width: 600px) {
+  .container-main {
+    padding: 0px 0px;
+    width: 100%;
+  }
+}
+.card .card-image {
+  background: black;
+}
+.card .card-image img {
+  opacity: 0.85;
+}
+.card .card-image .card-title {
+  text-shadow: 0px 0px 4px black;
+}
+.card .card-content .circle {
+  position: absolute;
+  height: 42px;
+  width: 42px;
+}
+.collection .collection-item.avatar {
+  height: auto;
+  min-height: 144px;
+  padding-left: 140px;
+}
+@media screen and (max-width : 600px) {
+  .collection .collection-item.avatar {
+    padding-left: 20px;
+  }
+}
+.collection .collection-item.avatar .circle {
+  width: 100px;
+  height: 100px;
+  top: 22px;
+}
+.collapsible .collapsible-body .row {
+  margin-bottom: 5px;
+  margin-bottom: 0px;
+}
+.collapsible .collapsible-body a {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+{% endblock %}
 
-      <p class="center-align grey-text text-lighten-1">This site is powered by
-      <a href="http://faexport.boothale.net/" target="_blank" class="grey-text">FAExport</a>,
-      <a href="http://materializecss.com/" target="_blank" class="grey-text">Materialize</a>
-      and <a href="https://jquery.com/" target="_blank" class="grey-text">jQuery</a>.</p>
+{% block content %}
+<div class="container container-main">
+  <div class="card large">
+  {% if head_img %}
+    <div class="card-image">
+      <a href="{% url 'fa.views.submission' head_img.id %}"><img src="{{ head_img.full }}"></a>
+      <span class="card-title">{{ name }}</span>
     </div>
-  </body>
-</html>
+  {% endif %}
+    <div class="card-content">
+      <span class="card-title activator grey-text text-darken-4"><i class="mdi-navigation-more-vert right"></i>User Profile</span>
+    </div>
+    <div class="card-reveal">
+      <span class="card-title grey-text text-darken-4"><img src="{{ avatar }}" class="circle"><i class="mdi-navigation-close right"></i></span>
+      <p class="flow-text">
+      {% for key, value in user_data %}
+        <strong>{{ key }}</strong>&nbsp;<em style="float:right;">{{ value }}</em><br>
+      {% endfor %}
+      </p>
+      <p class="flow-text">{{ profile|safe }}<p>
+    </div>
+    <div class="card-action">
+      <a href="{{ user_url }}" target="_blank">View on FA</a>
+    </div>
+  </div>
+
+{% if shouts %}
+  <ul class="collection z-depth-1">
+  {% for shout in shouts %}
+    <li class="collection-item avatar">
+      <img src="{{ shout.avatar }}" class="circle hide-on-small-only" title="{{ shout.name }}">
+      <span class="title flow-text"><a href="{% url 'fa.views.user' shout.username %}">{{ shout.name }}</a></span>
+      <p class="grey-text text-lighten-1" title="{{ shout.posted }}">{{ shout.delta }}</p>
+      <p class="flow-text grey-text text-darken-2">{{ shout.text|safe }}</p>
+    </li>
+  {% endfor %}
+  </ul>
+{% endif %}
+
+  <ul class="collapsible z-depth-1" data-collapsible="accordion">
+    <li>
+      <div class="collapsible-header"><i class="mdi-social-poll"></i>Statistics</div>
+      <div class="collapsible-body">
+        <p class="flow-text">
+        {% for key, value in user_stats %}
+          <strong>{{ key }}</strong>&nbsp;<em style="float:right;">{{ value }}</em><br>
+        {% endfor %}
+       </p>
+      </div>
+    </li>
+    <li>
+      <div class="collapsible-header"><i class="mdi-social-person"></i>Watched by</div>
+      <div class="collapsible-body">
+        <div class="row">
+        {% for user, id in watchers %}
+          <a class="col s6 m4 l3 center-align" href="{% url 'fa.views.user' id %}">{{ user }}</a>
+        {% endfor %}
+        {% if not watchers %}
+          <p class="col s12 center-align black-text">This user doesn't have watchers.</p>
+        {% else %}
+          <a class="col s12 flow-text center-align collapsible-link" href="{% url 'fa.views.watch' username 'watchers' %}">View All</a>
+        {% endif %}
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="collapsible-header"><i class="mdi-social-person-outline"></i>Is watching</div>
+      <div class="collapsible-body">
+        <div class="row">
+        {% for user, id in watching %}
+          <a class="col s6 m4 l3 center-align" href="{% url 'fa.views.user' id %}">{{ user }}</a>
+        {% endfor %}
+        {% if not watching %}
+          <p class="col s12 center-align black-text">This user is not watching anybody.</p>
+        {% else %}
+          <a class="col s12 flow-text center-align collapsible-link" href="{% url 'fa.views.watch' username 'watching' %}">View All</a>
+        {% endif %}
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+{% endblock %}
