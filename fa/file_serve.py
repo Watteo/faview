@@ -14,16 +14,19 @@
 #
 import mimetypes
 import os
+import socket
 import time
+import traceback
 import urllib2
 
 USER_AGENT  = 'Mozilla/5.0 (Windows NT 6.1; rv:31.0) Gecko/20100101 Firefox/31.0'
 
 class ServeStatic:
-    def __init__(self, rootpath, realpath, maxage=None):
+    def __init__(self, rootpath, realpath, maxage=None, timeout=5):
         self.rootpath = rootpath
         self.realpath = realpath
         self.maxage = maxage
+        self.timeout = timeout
 
     def __call__(self, environ, start_response):
         url_path    = urllib2.quote(environ['PATH_INFO'], '/:@')
@@ -43,9 +46,14 @@ class ServeStatic:
 
             try:
                 opener      = urllib2.build_opener()
-                raw_data    = opener.open(request_obj).read()
+                raw_data_d  = opener.open(request_obj, timeout=self.timeout)
+                raw_data    = raw_data_d.read()
             except urllib2.HTTPError as error:
                 raw_data    = error.read()
+            except socket.timeout as error:
+                print 'Fetch timeout: ' + real_url
+                start_response('404 File not found', [])
+                return []
             except Exception:
                 traceback.print_exc()
                 start_response('404 File not found', [])
