@@ -29,8 +29,8 @@ def user(request, name):
     try:
         api_user_data   = api_fetch('user/{}'.format(name))
         api_shouts      = api_fetch('user/{}/shouts'.format(name))
-        api_watchers    = api_fetch_watchs(name, 'watchers', 24)
-        api_watching    = api_fetch_watchs(name, 'watching', 24)
+        api_watchers    = api_fetch_watchs(name, 'watchers', 1, 24)
+        api_watching    = api_fetch_watchs(name, 'watching', 1, 24)
         api_gallery     = api_fetch('user/{}/gallery'.format(name))
     except Exception as e:
         logger.exception(e)
@@ -139,8 +139,16 @@ def gallery(request, name, folder):
 
 def watch(request, name, watch_view):
     try:
+        if request.GET.get('page'):
+            page = max(int(request.GET['page']), 1)
+        else:
+            page = 1
+
         api_user_data   = api_fetch('user/{}'.format(name))
-        api_watchs      = api_fetch_watchs(name, watch_view)
+        api_watchs      = api_fetch_watchs(name, watch_view, page)
+        watch_count     = len(api_watchs)
+        previous_page   = (page - 1) if page != 1 and watch_count > 0 else False
+        next_page       = (page + 1) if watch_count > 0 else False
     except Exception as e:
         logger.exception(e)
         return render(request, 'fa/500.html', {'exception':e})
@@ -156,6 +164,8 @@ def watch(request, name, watch_view):
         'view'      : watch_view,
         'head'      : head.format(name),
         'watchs'    : api_watchs,
+        'previous'  : previous_page,
+        'next'      : next_page,
     }
 
     return render(request, 'fa/watch.html', context)

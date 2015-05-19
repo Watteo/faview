@@ -59,28 +59,17 @@ def api_fetch(api_key, extra_args=''):
 
     return data
 
-def api_fetch_watchs(name, watch_view, limit=None):
-    watchs = []
-    index = 1
+def api_fetch_watchs(name, watch_view, page, limit=None):
+    try:
+        watchs = api_fetch(
+            'user/{}/{}'.format(name, watch_view),
+            '?page={}'.format(page) if page > 1 else '',
+        )
+    except:
+        watchs = []
 
-    while True:
-        try:
-            batch = api_fetch(
-                'user/{}/{}'.format(name, watch_view),
-                '?page={}'.format(index) if index > 1 else '',
-            )
-        except:
-            break
-
-        if not batch:
-            break
-
-        watchs += batch
-        index += 1
-
-        if limit and limit <= len(watchs):
-            watchs = watchs[0:limit]
-            break
+    if limit and limit <= len(watchs):
+        watchs = watchs[0:limit]
 
     return [(user, user.lower().replace('_', '')) for user in watchs]
 
