@@ -12,7 +12,9 @@ logger      = logging.getLogger(__name__)
 API_URL     = settings.FAEXPORT_API_URL
 API_TIMEOUT = settings.FAEXPORT_API_TIMEOUT
 USER_AGENT  = 'Mozilla/5.0 (Windows NT 6.1; rv:31.0) Gecko/20100101 Firefox/31.0'
-USER_REGEX  = re.compile(r'^http://www.furaffinity.net/user/([-_.~\[\]\w]+)/')
+
+USER_REGEX_STR = r'[-_.~`\[\]\w]+'
+USER_REGEX  = re.compile(r'^http://www.furaffinity.net/user/({})/'.format(USER_REGEX_STR))
 MEDIA_REGEX = re.compile(r'(^http:| src=")/(/[adt]\.facdn\.net|themes)(/.*?\.[a-zA-Z0-9]+)(#[^"]+)?($|")')
 
 MEDIA_PREFIX = {
