@@ -3,4 +3,5 @@ db.sqlite3
 website.log
 /media
 /static
+/website/settings.py
 /fa/static/materialize
