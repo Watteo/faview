@@ -1,8 +1,8 @@
 from django.conf.urls import url
 from fa import views
-from fa import fa_api
+from fa import api
 
-USER_URL_PATTERN    = r'^user/(?P<name>{})/'.format(fa_api.USER_REGEX_STR)
+USER_URL_PATTERN    = r'^user/(?P<name>{})/'.format(api.USER_REGEX_STR)
 
 urlpatterns = [
     url(r'^$', views.index),
