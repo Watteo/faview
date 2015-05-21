@@ -3,6 +3,20 @@
 {% block title %}{{ journ_data.title }}{% endblock %}
 {% block nav_title %}{{ name }}{% endblock %}
 
+{% block script %}
+<script>
+$(function(){
+  var previous = null, previous_bg = null;
+  $('a[href^=#]').click(function(){
+    if(previous != null) previous.css('background-color', previous_bg);
+    previous = $($(this).attr('href'));
+    previous_bg = previous.css('background-color');
+    previous.css('background-color', '#eceff1');
+  });
+});
+</script>
+{% endblock %}
+
 {% block style %}
 .top-nav {
   margin-bottom: 10px;
@@ -39,8 +53,8 @@
   <div class="col s12 z-depth-1">
     <div class="container-main" style="margin:auto;">
       <h2 class="header">{{ journ_data.title }}</h2>
-      <h5 class="grey-text text-lighten-1" title="{{ journ_data.posted }}">submitted {{ journ_data.delta }}</h5>
-      <p class="flow-text grey-text text-darken-3 lighten-3">{{ journ_data.description|safe }}</p>
+      <h5 class="grey-text" title="{{ journ_data.posted }}">submitted {{ journ_data.delta }}</h5>
+      <p class="flow-text grey-text text-darken-4">{{ journ_data.description|safe }}</p>
     </div>
   </div>
 </div>
@@ -49,11 +63,15 @@
 {% if comments %}
   <ul class="collection z-depth-1">
   {% for comment in comments %}
-    <li class="collection-item avatar">
+    <li class="collection-item avatar" id="{{ comment.id }}">
       <img src="{{ comment.avatar }}" class="circle hide-on-small-only" title="{{ comment.name }}">
-      <span class="title flow-text"><a href="{% url 'fa.views.user' comment.username %}">{{ comment.name }}</a></span>
-      <p class="grey-text text-lighten-1" title="{{ comment.posted }}">{{ comment.delta }}</p>
-      <p class="flow-text grey-text text-darken-2">{{ comment.text|safe }}</p>
+      <span class="title flow-text">
+        <a href="{% url 'fa.views.user' comment.username %}">{{ comment.name }}</a>
+        {% if comment.reply_to %}<a class="red-text text-lighten-1" href="#{{ comment.reply_to }}">>>{{ comment.reply_to }}</a>{% endif %}
+        <span class="grey-text text-darken-2" style="float:right;"><a class="grey-text text-darken-2" href="#{{ comment.id }}">No.</a>&nbsp;{{ comment.id }}</span>
+      </span>
+      <p class="grey-text" title="{{ comment.posted }}">{{ comment.delta }}</p>
+      <p class="flow-text grey-text text-darken-4">{{ comment.text|safe }}</p>
     </li>
   {% endfor %}
   </ul>

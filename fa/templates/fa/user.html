@@ -85,8 +85,8 @@
     <li class="collection-item avatar">
       <img src="{{ shout.avatar }}" class="circle hide-on-small-only" title="{{ shout.name }}">
       <span class="title flow-text"><a href="{% url 'fa.views.user' shout.username %}">{{ shout.name }}</a></span>
-      <p class="grey-text text-lighten-1" title="{{ shout.posted }}">{{ shout.delta }}</p>
-      <p class="flow-text grey-text text-darken-2">{{ shout.text|safe }}</p>
+      <p class="grey-text" title="{{ shout.posted }}">{{ shout.delta }}</p>
+      <p class="flow-text grey-text text-darken-4">{{ shout.text|safe }}</p>
     </li>
   {% endfor %}
   </ul>

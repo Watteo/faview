@@ -31,13 +31,13 @@ h5 {
   <div class="collection">
   {% for journal in journals %}
     <a class="collection-item" href="{% url 'fa.views.journal' journal.id %}">
-      <h5 class="grey-text text-darken-2">{{ journal.title }}</h5>
-      <h6 class="grey-text text-lighten-1">{{ journal.delta }}</h6>
+      <h5 class="grey-text text-darken-4">{{ journal.title }}</h5>
+      <h6 class="grey-text text-darken-2">{{ journal.delta }}</h6>
     </a>
   {% endfor %}
   </div>
   {% else %}
-  <p class="col s12 center-align black-text">This user hasn't posted any journals.</p>
+  <p class="col s12 center-align grey-text text-darken-4">This user hasn't posted any journals.</p>
   {% endif %}
 </div>
 {% endblock %}
