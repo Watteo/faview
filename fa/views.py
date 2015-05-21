@@ -14,6 +14,11 @@ def user(request, name):
     return render(request, 'fa/user.html', context)
 
 def gallery(request, name, folder):
+    if request.GET.get('page'):
+        page = max(int(request.GET['page']), 1)
+    else:
+        page = 1
+
     context = api.get_gallery_context(name, folder, page)
     return render(request, 'fa/gallery.html', context)
 
