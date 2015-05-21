@@ -5,14 +5,45 @@
 
 {% block script %}
 <script>
+// jQuery visible (https://github.com/customd/jquery-visible)
+;(function(e){e.fn.visible=function(t,n,r){var i=e(this).eq(0),s=i.get(0),o=e(window),u=o.scrollTop(),a=u+o.height(),f=o.scrollLeft(),l=f+o.width(),c=i.offset().top,h=c+i.height(),p=i.offset().left,d=p+i.width(),v=t===true?h:c,m=t===true?c:h,g=t===true?d:p,y=t===true?p:d,b=n===true?s.offsetWidth*s.offsetHeight:true,r=r?r:"both";if(r==="both")return!!b&&m<=a&&v>=u&&y<=l&&g>=f;else if(r==="vertical")return!!b&&m<=a&&v>=u;else if(r==="horizontal")return!!b&&y<=l&&g>=f}})(jQuery);
+
 $(function(){
-  var previous = null, previous_bg = null;
-  $('a[href^=#]').click(function(){
-    if(previous != null) previous.css('background-color', previous_bg);
-    previous = $($(this).attr('href'));
-    previous_bg = previous.css('background-color');
-    previous.css('background-color', '#eceff1');
+  function quote(target, parent, tmp) {
+    var blockquote = $('<blockquote>').html(target.html());
+    blockquote.find('img').remove();
+    blockquote.find('blockquote').remove();
+    if(tmp) blockquote.addClass('tmp');
+    parent.append(blockquote);
+  }
+
+  $('.collection-item').on('click', '.red-text[href^=#]', function(event){
+    event.preventDefault();
+    var parent = $(this).parent();
+    var blockquote = parent.find('blockquote');
+    if(blockquote.length > 0) {
+      if(blockquote.hasClass('tmp'))
+        blockquote.removeClass('tmp');
+      else
+        blockquote.remove();
+    } else {
+      quote($($(this).attr('href')), parent, false);
+    }
   });
+  if(!("ontouchstart" in document.documentElement)) {
+    $('.collection-item').on('mouseenter', '.red-text[href^=#]', function(){
+      var target = $($(this).attr('href'));
+      var parent = $(this).parent();
+      target.addClass('highlight');
+      if(!target.visible() && !parent.find('blockquote').length) {
+        quote(target, parent, true);
+      }
+    });
+    $('.collection-item').on('mouseleave', '.red-text[href^=#]', function(){
+      $($(this).attr('href')).removeClass('highlight');
+      $(this).parent().find('.tmp').remove();
+    });
+  }
 });
 </script>
 {% endblock %}
@@ -46,6 +77,9 @@ $(function(){
   height: 100px;
   top: 22px;
 }
+.collection .highlight {
+  background-color: #eceff1;
+}
 {% endblock %}
 
 {% block content %}
@@ -67,10 +101,10 @@ $(function(){
       <img src="{{ comment.avatar }}" class="circle hide-on-small-only" title="{{ comment.name }}">
       <span class="title flow-text">
         <a href="{% url 'fa.views.user' comment.username %}">{{ comment.name }}</a>
-        {% if comment.reply_to %}<a class="red-text text-lighten-1" href="#{{ comment.reply_to }}">>>{{ comment.reply_to }}</a>{% endif %}
+        <span class="grey-text" title="{{ comment.posted }}">{{ comment.delta }}</span>
         <span class="grey-text text-darken-2" style="float:right;"><a class="grey-text text-darken-2" href="#{{ comment.id }}">No.</a>&nbsp;{{ comment.id }}</span>
       </span>
-      <p class="grey-text" title="{{ comment.posted }}">{{ comment.delta }}</p>
+      {% if comment.reply_to %}<p><a class="red-text text-lighten-1" href="#{{ comment.reply_to }}">>>{{ comment.reply_to }}</a></p>{% endif %}
       <p class="flow-text grey-text text-darken-4">{{ comment.text|safe }}</p>
     </li>
   {% endfor %}

@@ -73,14 +73,17 @@ def fetch_first_image(username):
 
     return head_img
 
-def fetch_comments(comments_url, right_now=datetime.now()):
-    comments    = fetch_data(comments_url)
+def fetch_comments(comments_url, right_now=datetime.now(), sort_IDs=False):
+    comments = fetch_data(comments_url)
 
     for comment in comments:
         comment['username']   = replace_username(comment['profile'])
         comment['text']       = replace_media_urls(comment['text'])
         comment['avatar']     = replace_media_urls(comment['avatar'])
         comment['delta']      = natural_delta(comment['posted_at'], right_now)
+
+    if sort_IDs:
+        comments.sort(key=lambda comment: int(comment['id']))
 
     return comments
 
@@ -329,7 +332,11 @@ def get_submission_context(subm_id):
 
     right_now       = datetime.now()
     subm_data       = fetch_data('submission/{}'.format(subm_id))
-    subm_comments   = fetch_comments('submission/{}/comments'.format(subm_id), right_now)
+    subm_comments   = fetch_comments(
+        'submission/{}/comments'.format(subm_id),
+        right_now,
+        True,
+    )
     username        = replace_username(subm_data['profile'])
 
     subm_data['full']           = replace_media_urls(subm_data['full'])
@@ -369,7 +376,11 @@ def get_submission_context(subm_id):
 def get_journal_context(journ_id):
     right_now       = datetime.now()
     journ_data      = fetch_data('journal/{}'.format(journ_id))
-    journ_comments  = fetch_comments('journal/{}/comments'.format(journ_id), right_now)
+    journ_comments  = fetch_comments(
+        'journal/{}/comments'.format(journ_id),
+        right_now,
+        True,
+    )
     username        = replace_username(journ_data['profile'])
 
     journ_data['delta']         = natural_delta(journ_data['posted_at'], right_now)
