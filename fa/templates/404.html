@@ -1,6 +1,6 @@
 {% extends "fa/base.html" %}
 
-{% block title %}Internal Server Error{% endblock %}
+{% block title %}404 - Not Found{% endblock %}
 {% block default_nav_title %}FAView{% endblock %}
 
 {% block style %}
@@ -8,6 +8,7 @@
   max-width: 950px;
   padding: 0px 0px;
   width: 100%;
+  margin-top: 30px;
 }
 @media screen and (min-width : 601px) {
   .container-main {
@@ -17,9 +18,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="container container-main">
-  <h3>Something went wrong.</h3>
-  <h4>Here's what happened:</h4>
-  <p>{{ exception }}</p>
+<div class="container container-main center-align">
+  <h3>It ain't here.</h3>
+  <h5>404 Not Found</h5>
 </div>
 {% endblock %}
