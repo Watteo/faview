@@ -46,11 +46,9 @@ def fetch_data(api_key, extra_args=''):
 
     return data
 
-def fetch_full_name(username):
+def fetch_name(username):
     user_data = fetch_data('user/{}'.format(username))
-    full_name = user_data['full_name']
-
-    return username if full_name == 'Not Available...' else full_name
+    return user_data['name']
 
 def fetch_first_image(username):
     gallery = fetch_data('user/{}/gallery'.format(username))
@@ -228,7 +226,7 @@ def get_profile_context(username):
     ]
 
     context = {
-        'name'      : fetch_full_name(username),
+        'name'      : fetch_name(username),
         'username'  : username,
         'user_url'  : user_data['profile'],
         'head_img'  : head_img,
@@ -264,7 +262,7 @@ def get_gallery_context(username, folder, page=1):
         gallery.append(img)
 
     context = {
-        'name'      : fetch_full_name(username),
+        'name'      : fetch_name(username),
         'username'  : username,
         'folder'    : folder,
         'gallery'   : gallery,
@@ -279,7 +277,7 @@ def get_watch_context(username, watch_view, page=1):
     watch_count     = len(watch_list)
     previous_page   = (page - 1) if page != 1 and watch_count > 0 else False
     next_page       = (page + 1) if watch_count > 0 else False
-    full_name       = fetch_full_name(username)
+    full_name       = fetch_name(username)
 
     if watch_view == 'watching':
         head = '{} is watching'.format(full_name)
@@ -306,7 +304,7 @@ def get_journals_context(username):
         journal['delta'] = natural_delta(journal['posted_at'], right_now)
 
     context = {
-        'name'      : fetch_full_name(username),
+        'name'      : fetch_name(username),
         'username'  : username,
         'journals'  : journals,
     }
@@ -358,7 +356,7 @@ def get_submission_context(subm_id):
             subm_data['audio_type'] = 'mpeg' if file_ext == 'mp3' else 'ogg'
 
     context = {
-        'name'      : fetch_full_name(username),
+        'name'      : fetch_name(username),
         'username'  : username,
         'sub_data'  : subm_data,
         'comments'  : subm_comments,
@@ -376,7 +374,7 @@ def get_journal_context(journ_id):
     journ_data['description']   = replace_media_urls(journ_data['description'])
 
     context = {
-        'name'      : fetch_full_name(username),
+        'name'      : fetch_name(username),
         'username'  : username,
         'journ_data': journ_data,
         'comments'  : journ_comments,
