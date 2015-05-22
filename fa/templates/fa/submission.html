@@ -13,6 +13,7 @@ $(function(){
     var blockquote = $('<blockquote>').html(target.html());
     blockquote.find('img').remove();
     blockquote.find('blockquote').remove();
+    blockquote.find('a.grey-text.text-darken-2').remove();
     if(tmp) blockquote.addClass('tmp');
     parent.append(blockquote);
   }
@@ -34,13 +35,13 @@ $(function(){
     $('.collection-item').on('mouseenter', '.red-text[href^=#]', function(){
       var target = $($(this).attr('href'));
       var parent = $(this).parent();
-      target.addClass('highlight');
+      target.addClass('blue-grey').addClass('lighten-5');
       if(!target.visible() && !parent.find('blockquote').length) {
         quote(target, parent, true);
       }
     });
     $('.collection-item').on('mouseleave', '.red-text[href^=#]', function(){
-      $($(this).attr('href')).removeClass('highlight');
+      $($(this).attr('href')).removeClass('blue-grey').removeClass('lighten-5');
       $(this).parent().find('.tmp').remove();
     });
   }
@@ -85,8 +86,8 @@ $(function(){
   height: 100px;
   top: 22px;
 }
-.collection .highlight {
-  background-color: #eceff1;
+blockquote {
+  border-left: 5px solid #263238;
 }
 .collapsible .collapsible-header {
   height: auto;
@@ -149,7 +150,7 @@ $(function(){
       <span class="title flow-text">
         <a href="{% url 'fa.views.user' comment.username %}">{{ comment.name }}</a>
         <span class="grey-text" title="{{ comment.posted }}">{{ comment.delta }}</span>
-        <span class="grey-text text-darken-2" style="float:right;"><a class="grey-text text-darken-2" href="#{{ comment.id }}">No.</a>&nbsp;{{ comment.id }}</span>
+        <span class="grey-text text-darken-2" style="float:right;"><a class="grey-text text-darken-2" href="#{{ comment.id }}">No.&nbsp;{{ comment.id }}</a></span>
       </span>
       {% if comment.reply_to %}<p><a class="red-text text-lighten-1" href="#{{ comment.reply_to }}">>>{{ comment.reply_to }}</a></p>{% endif %}
       <p class="flow-text grey-text text-darken-4">{{ comment.text|safe }}</p>
