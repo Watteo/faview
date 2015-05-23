@@ -29,12 +29,36 @@ class ServeStatic:
         self.timeout = timeout
 
     def __call__(self, environ, start_response):
-        url_path    = urllib2.quote(environ['PATH_INFO'], '/:@')
+        file_data = self.get_file(environ['PATH_INFO'])
+
+        if not file_data:
+            start_response('404 File not found', [])
+            return []
+
+        if environ.get('HTTP_IF_NONE_MATCH', 'NONE') != file_data['fmtime']:
+            headers = []
+
+            if self.maxage:
+                headers.append((
+                    'Cache-control',
+                    'max-age={}'.format(self.maxage + time.time()),
+                ))
+
+            headers.append(('Content-Type', file_data['ftype']))
+            headers.append(('ETag', file_data['fmtime']))
+            headers.append(('Content-Length', file_data['fsize']))
+            start_response('200 OK', headers)
+            return file_data['fd']
+
+        start_response('304 Not Modified', [])
+        file_data['fd'].close()
+        return []
+
+    def get_file(self, url):
+        url_path    = urllib2.quote(url, '/:@')
         local_path  = self.rootpath + url_path
 
-        try:
-            f = open(local_path, 'rb')
-        except:
+        if not os.path.isfile(local_path):
             local_dir   = os.path.dirname(local_path)
 
             if not os.path.isdir(local_dir):
@@ -52,35 +76,19 @@ class ServeStatic:
                 raw_data    = error.read()
             except socket.timeout as error:
                 print 'Fetch timeout: ' + real_url
-                start_response('404 File not found', [])
-                return []
+                return None
             except Exception:
                 traceback.print_exc()
-                start_response('404 File not found', [])
-                return []
+                return None
 
             with open(local_path, 'wb') as f:
                 f.write(raw_data)
 
-            f = open(local_path, 'rb')
+        file_data = {
+            'fd'        : open(local_path, 'rb'),
+            'fmtime'    : str(os.path.getmtime(local_path)),
+            'ftype'     : mimetypes.guess_type(local_path)[0],
+            'fsize'     : os.path.getsize(local_path),
+        }
 
-        fmtime = os.path.getmtime(local_path)
-
-        if environ.get('HTTP_IF_NONE_MATCH', 'NONE') != str(fmtime):
-            headers = []
-
-            if self.maxage:
-                headers.append((
-                    'Cache-control',
-                    'max-age={}'.format(self.maxage + time.time()),
-                ))
-
-            ftype = mimetypes.guess_type(local_path)[0]
-            headers.append(('Content-Type', ftype))
-            headers.append(('ETag', fmtime))
-            headers.append(('Content-Length', os.path.getsize(local_path)))
-            start_response('200 OK', headers)
-            return f
-        else:
-            start_response('304 Not Modified', [])
-            return []
+        return file_data

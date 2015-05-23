@@ -1,6 +1,7 @@
 from django.core.cache import cache
 from django.conf import settings
 from datetime import datetime
+from file_serve import ServeStatic
 from string import capwords
 import chardet
 import json
@@ -105,27 +106,24 @@ def fetch_text(url):
 
     if data is None:
         logger.debug('CACHE MISS: {}'.format(cache_key))
-        local_path = re.sub(
-            r'{}(.*)'.format(settings.MEDIA_URL),
-            r'{}\1'.format(settings.MEDIA_ROOT),
-            url,
-        )
+        file_server = ServeStatic(settings.MEDIA_ROOT+'data', 'http://d.facdn.net')
+        real_url    = re.sub(settings.MEDIA_URL + 'data(/.*)', r'\1', url)
+        text_file   = file_server.get_file(real_url)['fd']
+        raw_data    = text_file.read()
+        text_file.close()
 
-        with open(local_path, 'rb') as f:
-            raw_data = f.read()
+        try:
             encoding = chardet.detect(raw_data)
-
-            try:
-                data = raw_data.decode(encoding['encoding'])
-                data = data.replace('<', '&lt;')
-                data = data.replace('>', '&gt;')
-                data = data.replace('\r\n', '<br>\n')
-                data = data.replace('\n', '<br>\n')
-            except Exception as e:
-                logger.exception(e)
-                data = ''
-
+            data = raw_data.decode(encoding['encoding'])
+            data = data.replace('<hr>', '---')
+            data = data.replace('<', '&lt;')
+            data = data.replace('>', '&gt;')
+            data = data.replace('\r\n', '<br>\n')
+            data = data.replace('\n', '<br>\n')
             cache.set(cache_key, data, API_TIMEOUT)
+        except Exception as e:
+            logger.exception(e)
+            data = ''
     else:
         logger.debug('CACHE HIT: {}'.format(cache_key))
 
@@ -357,9 +355,10 @@ def get_submission_context(subm_id):
         subm_data['full'] = replace_media_urls(subm_data['thumbnail'])
 
         if file_ext == 'txt':
-            subm_data['text_content'] = fetch_text(subm_data['full'])
+            subm_data['text_content'] = fetch_text(subm_data['download'])
+        elif file_ext == 'swf':
+            subm_data['swf_resolution'] = subm_data['resolution'].split('x')
         elif file_ext in ('mp3', 'ogg'):
-            subm_data['audio_content'] = subm_data['full']
             subm_data['audio_type'] = 'mpeg' if file_ext == 'mp3' else 'ogg'
 
     context = {
