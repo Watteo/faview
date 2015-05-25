@@ -55,7 +55,7 @@ class ServeStatic:
         return []
 
     def get_file(self, url):
-        url_path    = urllib2.quote(url, '/:@')
+        url_path    = urllib2.quote(url, '/:@%')
         local_path  = self.rootpath + url_path
 
         if not os.path.isfile(local_path):
