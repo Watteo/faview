@@ -323,7 +323,6 @@ def get_submission_context(subm_id):
         'views',
         'rating',
         'resolution',
-        'keywords',
     )
 
     right_now       = datetime.now()
@@ -338,7 +337,6 @@ def get_submission_context(subm_id):
     subm_data['full']           = replace_media_urls(subm_data['full'])
     subm_data['download']       = subm_data['full']
     subm_data['delta']          = natural_delta(subm_data['posted_at'], right_now)
-    subm_data['keywords']       = ', '.join(subm_data['keywords']) or '-'
     subm_data['description']    = replace_media_urls(re.sub(
         r'^<a href="/user/[^/]+/"><img alt="[^"]+" src="[^"]+"></a>',
         r'',

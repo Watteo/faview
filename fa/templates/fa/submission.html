@@ -154,6 +154,13 @@ blockquote {
         {% for key, value in sub_data.stats %}
           <strong>{{ key }}</strong>&nbsp;<em style="float:right;">{{ value }}</em><br>
         {% endfor %}
+        {% if sub_data.keywords %}
+          <strong>Keywords:</strong>&nbsp;<em style="float:right;">
+          {% for keyword in sub_data.keywords %}
+            <a href="{% url 'fa.views.search' %}?q=@keywords+{{ keyword }}">{{ keyword }}</a>
+          {% endfor %}
+          </em><br>
+        {% endif %}
         </p>
       </div>
     </li>
