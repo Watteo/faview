@@ -37,8 +37,8 @@
   <p class="col s12 center-align black-text">No items available.</p>
 {% endif %}
   <div class="col s12" style="padding-top:20px;padding-bottom:20px;">
-    {% if previous %}<a class="waves-effect waves-light blue-grey darken-3 btn left" href="{% url 'fa.views.watch' username view %}?page={{ previous }}"><i class="mdi-navigation-chevron-left left"></i>Previous</a>{% endif %}
-    {% if next %}<a class="waves-effect waves-light blue-grey darken-3 btn right" href="{% url 'fa.views.watch' username view %}?page={{ next }}"><i class="mdi-navigation-chevron-right right"></i>Next</a>{% endif %}
+    {% if previous %}<a class="waves-effect waves-light blue-grey darken-3 btn left col s5 m3 l2" href="{% url 'fa.views.watch' username view %}?page={{ previous }}"><i class="mdi-navigation-chevron-left left"></i>Previous</a>{% endif %}
+    {% if next %}<a class="waves-effect waves-light blue-grey darken-3 btn right col s5 m3 l2" href="{% url 'fa.views.watch' username view %}?page={{ next }}"><i class="mdi-navigation-chevron-right right"></i>Next</a>{% endif %}
   </div>
 </div>
 {% endblock %}
