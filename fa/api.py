@@ -59,7 +59,7 @@ def fetch_first_image(username):
 
     subm_id     = gallery[0]
     subm_data   = fetch_data('submission/{}'.format(subm_id))
-    subm_full   = subm_data['full']
+    subm_full   = replace_media_urls(subm_data['full'])
     file_ext    = re.sub(r'.*\.([a-z0-9]+)$', r'\1', subm_full.lower())
 
     if file_ext not in ('jpeg', 'jpg', 'png', 'gif', 'tif', 'tiff'):
