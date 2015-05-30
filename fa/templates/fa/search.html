@@ -20,6 +20,20 @@
   padding: 0px 0px;
   width: 100%;
 }
+.input-field .search-input {
+  width: -moz-calc(100% - 90px);
+  width: -webkit-calc(100% - 90px);
+  width: calc(100% - 90px);
+}
+.input-field .search-button {
+  width: 80px;
+  height: 44px;
+  line-height: 46px;
+}
+[type="checkbox"].filled-in:checked+label:after {
+  border: 2px solid #37474f;
+  background-color: #37474f;
+}
 @media screen and (min-width : 601px) {
   .container-main {
     width: 90%;
@@ -67,14 +81,40 @@
 {% endblock %}
 
 {% block content %}
-<div class="container container-main row">
-  <form class="col s12" style="padding:15px 0px;" method="get" action="{% url 'fa.views.search' %}">
-    <div class="input-field col s12">
-      <input placeholder="@keywords kw1 kw2..." id="query" name="q" value="{{ query }}" type="text" class="validate">
-      <label for="query">Search query</label>
-    </div>
-  </form>
+<div class="row z-depth-1">
+  <div class="container container-main">
+    <form class="col s12" style="padding:15px 0px;" method="get" action="{% url 'fa.views.search' %}">
+    {% if form.errors %}
+      <div class="col s12 red-text">
+      {{ form.non_field_errors }}
+      {% for field in form %}{% if field.errors %}{{ field.errors }}{% endif %}{% endfor %}
+      </div>
+    {% endif %}
+      <div class="input-field col s12">
+        {{ form.q }}{{ form.q.label_tag }}
+        <button class="btn waves-effect waves-light blue-grey darken-3 right search-button" type="submit"><i class="mdi-action-search"></i></button>
+      </div>
+      <div class="input-field col s6 m4">{{ form.perpage }}{{ form.perpage.label_tag }}</div>
+      <div class="input-field col s6 m4">{{ form.order_by }}{{ form.order_by.label_tag }}</div>
+      <div class="input-field col s6 m4">{{ form.order_direction }}{{ form.order_direction.label_tag }}</div>
+      <div class="input-field col s6 m6">{{ form.range }}{{ form.range.label_tag }}</div>
+      <div class="input-field col s6 m6">{{ form.mode }}{{ form.mode.label_tag }}</div>
+      <div class="col s12"><h6 class="grey-text">Rating</h6></div>
+      <div class="col s6 m4">{{ form.rating_general }}{{ form.rating_general.label_tag }}</div>
+      <div class="col s6 m4">{{ form.rating_mature }}{{ form.rating_mature.label_tag }}</div>
+      <div class="col s12 m4">{{ form.rating_adult }}{{ form.rating_adult.label_tag }}</div>
+      <div class="col s12"><h6 class="grey-text">Type</h6></div>
+      <div class="col s6 m4">{{ form.type_art }}{{ form.type_art.label_tag }}</div>
+      <div class="col s6 m4">{{ form.type_flash }}{{ form.type_flash.label_tag }}</div>
+      <div class="col s6 m4">{{ form.type_photo }}{{ form.type_photo.label_tag }}</div>
+      <div class="col s6 m4">{{ form.type_music }}{{ form.type_music.label_tag }}</div>
+      <div class="col s6 m4">{{ form.type_story }}{{ form.type_story.label_tag }}</div>
+      <div class="col s6 m4">{{ form.type_poetry }}{{ form.type_poetry.label_tag }}</div>
+    </form>
+  </div>
+</div>
 
+<div class="container container-main row">
 {% for image in gallery %}
   <div class="col s6 m4 l3">
     <div class="card">
@@ -91,7 +131,7 @@
   </div>
 {% endfor %}
 
-{% if query and not gallery %}
+{% if form.q.value and not gallery %}
   <p class="col s12 center-align grey-text text-darken-4">No items available.</p>
 {% endif %}
 

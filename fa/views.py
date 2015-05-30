@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from fa import api
+from fa.forms import SearchForm
 from datetime import datetime
 import re
 
@@ -49,7 +50,11 @@ def search(request):
     else:
         page = 1
 
-    query   = request.GET.get('q')
-    context = api.get_search_context(query, page)
+    if request.method == 'GET' and request.GET.get('q'):
+        form = SearchForm(request.GET)
+    else:
+        form = SearchForm()
+
+    context = api.get_search_context(form, page)
     return render(request, 'fa/search.html', context)
 

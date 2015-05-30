@@ -1,6 +1,7 @@
 from django.core.cache import cache
 from django.conf import settings
 from datetime import datetime
+from fa.forms import SearchForm
 from file_serve import ServeStatic
 from string import capwords
 import chardet
@@ -390,19 +391,19 @@ def get_journal_context(journ_id):
 
     return context
 
-def get_search_context(query, page=1):
-    if not query:
+def get_search_context(form, page=1):
+    if not form.is_valid():
         return {
-            'query'     : '',
             'gallery'   : [],
             'previous'  : False,
             'next'      : False,
+            'form'      : form,
         }
 
     if page > 1:
-        extra_args = '?q={}&full=1&page={}'.format(query, page)
+        extra_args = '?full=1&{}&page={}'.format(form.args(), page)
     else:
-        extra_args = '?q={}&full=1'.format(query)
+        extra_args = '?full=1&{}'.format(form.args())
 
     search_data     = fetch_data('search', extra_args)
     result_size     = len(search_data)
@@ -419,10 +420,10 @@ def get_search_context(query, page=1):
         gallery.append(img)
 
     context = {
-        'query'     : query,
         'gallery'   : gallery,
         'previous'  : previous_page,
         'next'      : next_page,
+        'form'      : form,
     }
 
     return context
