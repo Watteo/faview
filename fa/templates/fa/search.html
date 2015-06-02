@@ -14,6 +14,18 @@
 <a href="#" data-activates="slide-out" class="button-collapse"><i class="mdi-navigation-menu"></i></a>
 {% endblock %}
 
+{% block script %}
+<script>
+$(document).ready(function(){
+  $("#toggle-options").on('click', function(event){
+    event.preventDefault();
+    $(this).children("i").toggleClass("mdi-navigation-expand-more mdi-navigation-expand-less");
+    $("#search-options").toggle();
+  });
+});
+</script>
+{% endblock %}
+
 {% block style %}
 .container-main {
   max-width: 950px;
@@ -21,14 +33,16 @@
   width: 100%;
 }
 .input-field .search-input {
-  width: -moz-calc(100% - 90px);
-  width: -webkit-calc(100% - 90px);
-  width: calc(100% - 90px);
+  width: -moz-calc(100% - 138px);
+  width: -webkit-calc(100% - 138px);
+  width: calc(100% - 138px);
 }
-.input-field .search-button {
-  width: 80px;
+.input-field button {
+  width: 60px;
   height: 44px;
   line-height: 46px;
+  margin-left: 8px;
+  padding: 0;
 }
 [type="checkbox"].filled-in:checked+label:after {
   border: 2px solid #37474f;
@@ -93,20 +107,23 @@
       <div class="input-field col s12">
         {{ form.q }}{{ form.q.label_tag }}
         <button class="btn waves-effect waves-light blue-grey darken-3 right search-button" type="submit"><i class="mdi-action-search"></i></button>
+        <button class="btn waves-effect waves-light blue-grey darken-3 right search-options" id="toggle-options"><i class="mdi-navigation-expand-more"></i></button>
       </div>
-      <div class="input-field col s6 m4">{{ form.perpage }}{{ form.perpage.label_tag }}</div>
-      <div class="input-field col s6 m4">{{ form.order_by }}{{ form.order_by.label_tag }}</div>
-      <div class="input-field col s6 m4">{{ form.order_direction }}{{ form.order_direction.label_tag }}</div>
-      <div class="input-field col s6 m6">{{ form.range }}{{ form.range.label_tag }}</div>
-      <div class="input-field col s6 m6">{{ form.mode }}{{ form.mode.label_tag }}</div>
-      <div class="col s12"><h6 class="grey-text">{{ form.rating.label }}</h6></div>
-    {% for rating in form.rating %}
-      <div class="col s6 m4">{{ rating.tag }}<label for="id_rating_{{ forloop.counter0 }}">{{ rating.choice_label }}</label></div>
-    {% endfor %}
-      <div class="col s12"><h6 class="grey-text">{{ form.type.label }}</h6></div>
-    {% for type in form.type %}
-      <div class="col s6 m4">{{ type.tag }}<label for="id_type_{{ forloop.counter0 }}">{{ type.choice_label }}</label></div>
-    {% endfor %}
+      <div id="search-options" style="display:none;">
+        <div class="input-field col s6 m4">{{ form.perpage }}{{ form.perpage.label_tag }}</div>
+        <div class="input-field col s6 m4">{{ form.order_by }}{{ form.order_by.label_tag }}</div>
+        <div class="input-field col s6 m4">{{ form.order_direction }}{{ form.order_direction.label_tag }}</div>
+        <div class="input-field col s6 m6">{{ form.range }}{{ form.range.label_tag }}</div>
+        <div class="input-field col s6 m6">{{ form.mode }}{{ form.mode.label_tag }}</div>
+        <div class="col s12"><h6 class="grey-text">{{ form.rating.label }}</h6></div>
+      {% for rating in form.rating %}
+        <div class="col s6 m4">{{ rating.tag }}<label for="id_rating_{{ forloop.counter0 }}">{{ rating.choice_label }}</label></div>
+      {% endfor %}
+        <div class="col s12"><h6 class="grey-text">{{ form.type.label }}</h6></div>
+      {% for type in form.type %}
+        <div class="col s6 m4">{{ type.tag }}<label for="id_type_{{ forloop.counter0 }}">{{ type.choice_label }}</label></div>
+      {% endfor %}
+      </div>
     </form>
   </div>
 </div>
