@@ -2,18 +2,21 @@ from django import forms
 from django.utils.safestring import mark_safe
 from textwrap import dedent
 
-class SearchBooleanField(forms.BooleanField):
-    def __init__(self, label, *args, **kwargs):
-        kwargs['label']     = label
-        kwargs['initial']   = True
-        kwargs['required']  = False
-        kwargs['label_suffix'] = ''
-        kwargs['widget']    = forms.CheckboxInput(attrs={
-            'class'         : 'filled-in',
-        })
-        super(SearchBooleanField, self).__init__(*args, **kwargs)
+import logging
+logger = logging.getLogger(__name__)
 
 class SearchForm(forms.Form):
+    INITIAL_VALUES = {
+        'perpage'           : '60',
+        'order_by'          : 'date',
+        'order_direction'   : 'desc',
+        'range'             : 'all',
+        'mode'              : 'extended',
+        'rating'            : ['general', 'mature', 'adult'],
+        'type'              : ['art', 'flash', 'photo', 'music', 'story', 'poetry'],
+        'page'              : '1',
+    }
+
     q = forms.CharField(
         label       = 'Search query',
         widget      = forms.TextInput(attrs={
@@ -24,7 +27,8 @@ class SearchForm(forms.Form):
     )
     perpage = forms.ChoiceField(
         label       = 'Results per page',
-        initial     = '60',
+        required    = False,
+        initial     = INITIAL_VALUES['perpage'],
         choices     = (
             ('60', '60'),
             ('48', '48'),
@@ -34,7 +38,8 @@ class SearchForm(forms.Form):
     )
     order_by = forms.ChoiceField(
         label       = 'Order by',
-        initial     = 'date',
+        required    = False,
+        initial     = INITIAL_VALUES['order_by'],
         choices     = (
             ('date', 'Date'),
             ('relevancy', 'Relevancy'),
@@ -43,7 +48,8 @@ class SearchForm(forms.Form):
     )
     order_direction = forms.ChoiceField(
         label       = 'Order direction',
-        initial     = 'desc',
+        required    = False,
+        initial     = INITIAL_VALUES['order_direction'],
         choices     = (
             ('desc' , 'Descending'),
             ('asc'  , 'Ascending'),
@@ -51,7 +57,8 @@ class SearchForm(forms.Form):
     )
     range = forms.ChoiceField(
         label       = 'Time range',
-        initial     = 'all',
+        required    = False,
+        initial     = INITIAL_VALUES['range'],
         choices     = (
             ('all'  , 'All time'),
             ('month', 'A month'),
@@ -62,49 +69,88 @@ class SearchForm(forms.Form):
     )
     mode = forms.ChoiceField(
         label       = 'Match mode',
-        initial     = 'extended',
+        required    = False,
+        initial     = INITIAL_VALUES['mode'],
         choices     = (
             ('extended', 'Extended'),
             ('any'  , 'Match any'),
             ('all'  , 'Match all'),
         ),
     )
+    rating = forms.MultipleChoiceField(
+        label       = 'Rating',
+        widget      = forms.CheckboxSelectMultiple(attrs={
+            'class' : 'filled-in',
+        }),
+        initial     = INITIAL_VALUES['rating'],
+        choices     = (
+            ('general'  , 'General'),
+            ('mature'   , 'Mature'),
+            ('adult'    , 'Adult'),
+        ),
+    )
+    type = forms.MultipleChoiceField(
+        label       = 'Type',
+        widget      = forms.CheckboxSelectMultiple(attrs={
+            'class' : 'filled-in',
+        }),
+        initial     = INITIAL_VALUES['type'],
+        choices     = (
+            ('art'      , 'Art'),
+            ('flash'    , 'Flash'),
+            ('photo'    , 'Photography'),
+            ('music'    , 'Music'),
+            ('story'    , 'Story'),
+            ('poetry'   , 'Poetry'),
+        ),
+    )
+    page = forms.IntegerField(
+        widget      = forms.HiddenInput(),
+        initial     = INITIAL_VALUES['page'],
+        min_value   = 1,
+    )
 
-    ARGS = ('q', 'perpage', 'order_by', 'order_direction', 'range', 'mode')
-    SUBM_RATINGS = ('general', 'mature', 'adult')
-    SUBM_TYPES = ('art', 'flash', 'photo', 'music', 'story', 'poetry')
+    def __init__(self, initial=None):
+        if initial:
+            initial = initial.copy()
 
-    def __init__(self, *args, **kwargs):
-        super(SearchForm, self).__init__(*args, **kwargs)
+            for key, value in self.INITIAL_VALUES.iteritems():
+                if not key in initial:
+                    if isinstance(value, list):
+                        initial.setlist(key, value)
+                    else:
+                        initial[key] = value
 
-        for subm_rating in self.SUBM_RATINGS:
-            self.fields['rating_' + subm_rating] = SearchBooleanField(
-                subm_rating.capitalize()
-            )
-        for subm_type in self.SUBM_TYPES:
-            self.fields['type_' + subm_type] = SearchBooleanField(
-                subm_type.capitalize()
-            )
+        logger.debug(initial)
+        super(SearchForm, self).__init__(initial)
 
     def args(self):
         cleaned_data = super(SearchForm, self).clean()
-        args = '&'.join([
-            '{}={}'.format(arg, cleaned_data.get(arg))
-            for arg in self.ARGS
-        ])
+        args = []
 
-        ratings = ','.join([
-            subm_rating
-            for subm_rating in self.SUBM_RATINGS
-            if cleaned_data.get('rating_' + subm_rating)
-        ])
-        args = args + '&rating=' + ratings if ratings else args
+        for field, field_data in cleaned_data.iteritems():
+            if isinstance(field_data, list):
+                field_data = ','.join(field_data)
 
-        types = ','.join([
-            subm_type
-            for subm_type in self.SUBM_TYPES
-            if cleaned_data.get('type_' + subm_type)
-        ])
-        args = args + '&type=' + types if types else args
+            args.append('{}={}'.format(field, field_data))
 
-        return args
+        return '&'.join(args)
+
+    def page_nav_urls(self):
+        cleaned_data = super(SearchForm, self).clean()
+        page = cleaned_data.pop('page')
+        args = []
+
+        for field, field_data in cleaned_data.iteritems():
+            if isinstance(field_data, list):
+                for item in field_data:
+                    args.append('{}={}'.format(field, item))
+            else:
+                args.append('{}={}'.format(field, field_data))
+
+        args = '&'.join(args)
+        prev = '{}&page={}'.format(args, page-1) if page > 1 else False
+        next = '{}&page={}'.format(args, page+1)
+
+        return prev, next
+

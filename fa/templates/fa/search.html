@@ -87,7 +87,7 @@
     {% if form.errors %}
       <div class="col s12 red-text">
       {{ form.non_field_errors }}
-      {% for field in form %}{% if field.errors %}{{ field.errors }}{% endif %}{% endfor %}
+      {% for field in form %}{% if field.errors %}{{ field.label }}: {{ field.errors }}{% endif %}{% endfor %}
       </div>
     {% endif %}
       <div class="input-field col s12">
@@ -99,17 +99,14 @@
       <div class="input-field col s6 m4">{{ form.order_direction }}{{ form.order_direction.label_tag }}</div>
       <div class="input-field col s6 m6">{{ form.range }}{{ form.range.label_tag }}</div>
       <div class="input-field col s6 m6">{{ form.mode }}{{ form.mode.label_tag }}</div>
-      <div class="col s12"><h6 class="grey-text">Rating</h6></div>
-      <div class="col s6 m4">{{ form.rating_general }}{{ form.rating_general.label_tag }}</div>
-      <div class="col s6 m4">{{ form.rating_mature }}{{ form.rating_mature.label_tag }}</div>
-      <div class="col s12 m4">{{ form.rating_adult }}{{ form.rating_adult.label_tag }}</div>
-      <div class="col s12"><h6 class="grey-text">Type</h6></div>
-      <div class="col s6 m4">{{ form.type_art }}{{ form.type_art.label_tag }}</div>
-      <div class="col s6 m4">{{ form.type_flash }}{{ form.type_flash.label_tag }}</div>
-      <div class="col s6 m4">{{ form.type_photo }}{{ form.type_photo.label_tag }}</div>
-      <div class="col s6 m4">{{ form.type_music }}{{ form.type_music.label_tag }}</div>
-      <div class="col s6 m4">{{ form.type_story }}{{ form.type_story.label_tag }}</div>
-      <div class="col s6 m4">{{ form.type_poetry }}{{ form.type_poetry.label_tag }}</div>
+      <div class="col s12"><h6 class="grey-text">{{ form.rating.label }}</h6></div>
+    {% for rating in form.rating %}
+      <div class="col s6 m4">{{ rating.tag }}<label for="id_rating_{{ forloop.counter0 }}">{{ rating.choice_label }}</label></div>
+    {% endfor %}
+      <div class="col s12"><h6 class="grey-text">{{ form.type.label }}</h6></div>
+    {% for type in form.type %}
+      <div class="col s6 m4">{{ type.tag }}<label for="id_type_{{ forloop.counter0 }}">{{ type.choice_label }}</label></div>
+    {% endfor %}
     </form>
   </div>
 </div>
@@ -136,8 +133,8 @@
 {% endif %}
 
   <div class="col s12" style="padding-top:20px;padding-bottom:20px;">
-    {% if previous %}<a class="waves-effect waves-light blue-grey darken-3 btn left col s5 m3 l2" href="{% url 'fa.views.search' %}?q={{ query }}&page={{ previous }}"><i class="mdi-navigation-chevron-left left"></i>Newer</a>{% endif %}
-    {% if next %}<a class="waves-effect waves-light blue-grey darken-3 btn right col s5 m3 l2" href="{% url 'fa.views.search' %}?q={{ query }}&page={{ next }}"><i class="mdi-navigation-chevron-right right"></i>Older</a>{% endif %}
+    {% if previous %}<a class="waves-effect waves-light blue-grey darken-3 btn left col s5 m3 l2" href="{% url 'fa.views.search' %}?{{ previous }}"><i class="mdi-navigation-chevron-left left"></i>Newer</a>{% endif %}
+    {% if next %}<a class="waves-effect waves-light blue-grey darken-3 btn right col s5 m3 l2" href="{% url 'fa.views.search' %}?{{ next }}"><i class="mdi-navigation-chevron-right right"></i>Older</a>{% endif %}
   </div>
 </div>
 {% endblock %}

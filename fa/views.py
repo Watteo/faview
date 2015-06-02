@@ -45,16 +45,11 @@ def journal(request, journ_id):
     return render(request, 'fa/journal.html', context)
 
 def search(request):
-    if request.GET.get('page'):
-        page = max(int(request.GET['page']), 1)
-    else:
-        page = 1
-
     if request.method == 'GET' and request.GET.get('q'):
         form = SearchForm(request.GET)
     else:
         form = SearchForm()
 
-    context = api.get_search_context(form, page)
+    context = api.get_search_context(form)
     return render(request, 'fa/search.html', context)
 
